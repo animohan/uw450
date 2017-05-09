@@ -1,12 +1,14 @@
+library("NbClust")
+library(cluster)
+library(factoextra)
+library(fpc)
+
 cart = read.csv("Sessions.csv", stringsAsFactors = FALSE)
 dim(cart)
 str(cart)
 head(cart)
 
-km.cart = kmeans(cart,4,nstart = 20)
-km.cart
-plot(cart[c("Home","Products")], col = km.cart$cluster)
-points(km.cart$centers[,c("Home","Products")], col = 1:4, pch  = 23, cex = 3)
+
 
 
 set.seed(2)
@@ -29,27 +31,33 @@ for(i in 4:8){
 #Minimize within cluster variation
 # Maximize: betweenss/totss
 
-
-km.out$withinss
-
-km.out = kmeans(x, 4, nstart = 20)
-km.out
-km.out$tot.withinss
-km.out$betweenss
-km.out$betweenss/km.out$totss
-km.out$ifault
-
-for(i in 4:8){
+set.seed(1)
+cart.withinss = numeric()
+cart.ssratio = numeric()
+for(i in 3:25){
   cart.out = kmeans(cart, i, nstart = 20)
-  print(cart.out$betweenss/cart.out$totss)
+  cart.withinss = c(cart.withinss, cart.out$tot.withinss)
 }
+plot(cart.withinss)
 
 
-cart.out = cbind(cart, km.out$cluster)
+# nbCluster
+res.nb = NbClust(cart, distance = "euclidean", min.nc = 4, max.nc = 50, method = "complete" , index = "gap")
+res.nb
+clust = fviz_nbclust(cart, kmeans, method = c("silhouette", "wss", "gap_stat"), k.max = 5)
+fviz_cluster(cart.out, cart)
 
-temp.cart = cart.out[cart$Prod_B==1 & cart$Search ==1 & cart$Home == 1,]
-sum(temp.cart$Prod_A)/sum(temp.cart$Home)
-sum(temp.cart$Prod_C)/sum(temp.cart$Home)
+
+#pam
+pamk.best = pamk(cart)
+plot(pam(d,pamk.best$nc))
+pamk.best$nc
+
+
+gap_stat <- clusGap(cart, FUN = kmeans, nstart = 25,K.max = 20, B = 50)
+plot(gap_stat, frame = FALSE, xlab = "Number of clusters k")
+abline(v = 3, lty = 2)
+
 
 cart.out[cart$Prod_B==1 & cart$Search ==1 & cart$Home == 1 & cart$Purchase == 0 & cart$Cart == 0 & cart$Prod_A == 0 & cart$Prod_C ==0, ]
 cart.out[cart$Prod_C ==1 & cart$Products == 1 & cart$Home == 0, ]
