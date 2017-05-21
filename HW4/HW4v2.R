@@ -27,3 +27,86 @@ category.income[vid$Income < 25000] = "Low"
 
 vid$category.income = category.income
 vid
+
+vid = read.csv("Video_Store.csv")
+vid = data.frame(vid)
+names(vid)
+
+GenderM = rep(0,length(vid$Gender))
+GenderM[vid$Gender == "M"] = 1
+
+GenderF = rep(0,length(vid$Gender))
+GenderF[vid$Gender == "F"] = 1
+
+IncidentalsNo = rep(0, length(vid$Incidentals))
+IncidentalsNo[vid$Incidentals == "No"] = 1
+
+IncidentalsYes = rep(0, length(vid$Incidentals))
+IncidentalsYes[vid$Incidentals == "Yes"] = 1
+
+GenreComedy = rep(0, length(vid$Genre))
+GenreComedy[vid$Genre == 'Comedy'] = 1
+
+GenreAction = rep(0, length(vid$Genre))
+GenreAction[vid$Genre == 'Action'] = 1
+
+GenreDrama = rep(0, length(vid$Genre))
+GenreDrama[vid$Genre == 'Drama'] = 1
+
+
+newvid = data.frame(cbind(vid$Cust.ID, GenderM, GenderF, vid$Income, vid$Age, vid$Rentals, vid$Avg.Per.Visit,
+               IncidentalsNo, IncidentalsYes, GenreDrama,GenreAction, GenreComedy))
+names(newvid)
+
+names(newvid) = c("Cust.ID","GenderM","GenderF","Income","Age","Rentals","Avg.Per.Visit",
+                  "IncidentalsNo","IncidentalsYes","GenreDrama","GenreAction","GenreComedy")
+newvid
+
+library(ellipse)
+vidcor = cor( newvid[,c("GenderM","GenderF","Income","Age","Rentals","Avg.Per.Visit",
+                       "IncidentalsNo","IncidentalsYes","GenreDrama","GenreAction","GenreComedy") ], method = "pearson")
+
+library(corrplot)
+corrplot(vidcor, method="circle", type='lower')
+
+xtabs(newvid$GenderM+newvid$GenderF ~ newvid$GenreAction + newvid$GenreDrama + newvid$GenreComedy)
+
+FemaleComedy = xtabs(~ newvid$GenderF + newvid$GenreComedy)
+MaleComedy = xtabs(~ newvid$GenderM + newvid$GenreComedy)
+GenreComedyCol = rep(NA,2)
+GenreComedyCol[1] = FemaleComedy[4]
+GenreComedyCol[2] = MaleComedy[4]
+
+FemaleDrama = xtabs(~ newvid$GenderF + newvid$GenreDrama)
+MaleDrama = xtabs(~ newvid$GenderM + newvid$GenreDrama)
+GenreDramaCol = rep(NA,2)
+GenreDramaCol[1] = FemaleDrama[4]
+GenreDramaCol[2] = MaleDrama[4]
+
+FemaleAction= xtabs(~ newvid$GenderF + newvid$GenreAction)
+MaleAction = xtabs(~ newvid$GenderM + newvid$GenreAction)
+GenreActionCol = rep(NA,2)
+GenreActionCol[1] = FemaleAction[4]
+GenreActionCol[2] = MaleAction[4]
+
+GenderGenre = cbind(GenreComedyCol,GenreActionCol,GenreDramaCol)
+row.names(GenderGenre) = c("Female","Male")
+GenderGenre
+
+vid[vid$Gender == "F" && vid$Genre == "Comedy"]
+
+#High Rentals.
+
+HighRentals = vid[vid$Rentals >= 30,]
+summary(HighRentals)
+#Actions are much more likely to be rented.
+#Average and Median income of folks who rent more movies are lower.
+# Average age is lower.
+
+HighIncidentals = vid[vid$Incidentals == "Yes",]
+summary(HighIncidentals)
+summary(vid)
+
+# Males are more likely to by incidentals.
+# Folks who rent Action or Drama are more likely; comedy is less likely.
+#
