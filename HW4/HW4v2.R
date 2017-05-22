@@ -27,6 +27,9 @@ category.income[vid$Income < 25000] = "Low"
 
 vid$category.income = category.income
 vid
+write.csv(vid, file = "Part_a_d_Video_Store.csv", sep = ',')
+
+
 
 vid = read.csv("Video_Store.csv")
 vid = data.frame(vid)
@@ -62,6 +65,7 @@ names(newvid) = c("Cust.ID","GenderM","GenderF","Income","Age","Rentals","Avg.Pe
                   "IncidentalsNo","IncidentalsYes","GenreDrama","GenreAction","GenreComedy")
 newvid
 
+write.csv(newvid, file = "Part_e_Video_Store.csv")
 library(ellipse)
 vidcor = cor( newvid[,c("GenderM","GenderF","Income","Age","Rentals","Avg.Per.Visit",
                        "IncidentalsNo","IncidentalsYes","GenreDrama","GenreAction","GenreComedy") ], method = "pearson")
